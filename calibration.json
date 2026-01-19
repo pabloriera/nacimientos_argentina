@@ -7,7 +7,7 @@
     "surv_female_age0": 0.9993098146966948,
     "tfr_bias": 0.30980782931773143,
     "tfr_slope": 0.002414893235918167,
-    "survival_mult": 1.0
+    "survival_mult": 0.999755859375
   },
   "Low": {
     "base_year": 2024,
@@ -17,7 +17,7 @@
     "surv_female_age0": 0.9993512078096475,
     "tfr_bias": -0.2767021146922222,
     "tfr_slope": -0.000209385796890708,
-    "survival_mult": 1.0
+    "survival_mult": 0.999609375
   },
   "Medium": {
     "base_year": 2024,
@@ -27,6 +27,6 @@
     "surv_female_age0": 0.9993198809130003,
     "tfr_bias": 0.017359517392032217,
     "tfr_slope": 0.0011597886800517431,
-    "survival_mult": 1.0
+    "survival_mult": 0.99970703125
   }
 }
