@@ -59,6 +59,16 @@ async function loadData() {
   };
 }
 
+async function loadCalibration() {
+  try {
+    const response = await fetch("calibration.json");
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    return null;
+  }
+}
+
 function indexByVariantYearAge(rows) {
   const byVariant = new Map();
   rows.forEach((row) => {
@@ -382,6 +392,7 @@ function findScaleAtYear(series, year) {
 
 async function main() {
   const data = await loadData();
+  const calibration = await loadCalibration();
   const totals = buildTotals(data);
   const unTraces = buildUnTraces(totals);
   const baseYear = 2024;
@@ -406,10 +417,12 @@ async function main() {
   variants.forEach((variant) => {
     const estimatesSeries = cache.fertScales.get("Estimates") || [];
     const variantSeries = cache.fertScales.get(variant) || [];
-    const baseScale =
+    const calibratedScale = calibration?.[variant]?.base_scale ?? null;
+    const fallbackScale =
       findScaleAtYear(estimatesSeries, baseYear) ??
       findScaleAtYear(variantSeries, baseYear) ??
       (variantSeries.length ? variantSeries[variantSeries.length - 1].scale : 0);
+    const baseScale = calibratedScale ?? fallbackScale;
     cache.baseFertScale.set(variant, baseScale);
   });
 
@@ -499,9 +512,19 @@ async function main() {
 
   let rafId = null;
   let pending = false;
+  let lastVariant = null;
 
   const doUpdate = () => {
     const variant = variantSelect.value;
+    if (variant !== lastVariant) {
+      const cal = calibration?.[variant];
+      if (cal) {
+        tfrBias.value = String(cal.tfr_bias ?? 0);
+        tfrSlope.value = String(cal.tfr_slope ?? 0);
+        survivalMult.value = String(cal.survival_mult ?? 1);
+      }
+      lastVariant = variant;
+    }
     const biasValue = Number(tfrBias.value);
     const slopeValue = Number(tfrSlope.value);
     const survivalValue = Number(survivalMult.value);
