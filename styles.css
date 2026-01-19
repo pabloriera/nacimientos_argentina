@@ -1,0 +1,148 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --text: #1f2a44;
+  --muted: #5b6b8a;
+  --accent: #2e86ab;
+  --accent-2: #a23b72;
+  --accent-3: #f18f01;
+  --accent-4: #06a77d;
+  --shadow: 0 10px 30px rgba(31, 42, 68, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.hero {
+  background: linear-gradient(120deg, #1f2a44 0%, #2e86ab 100%);
+  color: white;
+  padding: 48px 24px;
+}
+
+.hero__content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.hero h1 {
+  margin: 0 0 12px 0;
+  font-size: 2.4rem;
+}
+
+h2 {
+  margin: 0;
+}
+
+.hero p {
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.hero__badges span {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  margin-right: 8px;
+  font-size: 0.85rem;
+}
+
+.layout {
+  max-width: 90vw;
+  margin: -30px auto 40px;
+  padding: 0 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.plot-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .plot-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: var(--muted);
+  gap: 8px;
+}
+
+select,
+input[type="range"] {
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #d6deee;
+  font-size: 0.95rem;
+}
+
+.value {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.chart {
+  width: 100%;
+  min-height: 230px;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.gif {
+  width: 80%;
+  max-width: 700px;
+  border-radius: 12px;
+  border: 1px solid #e3e9f5;
+  display: block;
+  margin: 0 auto;
+}
+
+.gif-download {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.gif-download:hover {
+  text-decoration: underline;
+}
+
+.footer {
+  text-align: center;
+  color: var(--muted);
+  padding: 24px;
+}

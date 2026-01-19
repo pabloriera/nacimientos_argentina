@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Argentina · Población total (UN WPP + Modelo)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://cdn.plot.ly" />
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js" defer></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["$", "$"], ["\\(", "\\)"]],
+        displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+      },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__content">
+      <h1>Argentina · Proyección de población total</h1>
+      <p>Visualización interactiva basada en datos de Naciones Unidas (WPP 2024) y un modelo de cohortes calibrado.</p>
+      <div class="hero__badges">
+        <span>WPP 2024</span>
+        <span>Modelo de cohortes</span>
+        <span>Explorable en tiempo real</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card">
+      <h2>Controles</h2>
+      <div class="controls">
+        <label>
+          Variante UN
+          <select id="variantSelect">
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Low">Low</option>
+          </select>
+        </label>
+        <label>
+          Sesgo TFR (hijos por mujer)
+          <input id="tfrBias" type="range" min="-1.0" max="1.0" step="0.01" value="0.00" />
+          <span class="value" id="tfrBiasVal">0.00</span>
+        </label>
+        <label>
+          Pendiente TFR (hijos por mujer/año)
+          <input id="tfrSlope" type="range" min="-0.03" max="0.03" step="0.001" value="0.000" />
+          <span class="value" id="tfrSlopeVal">0.000</span>
+        </label>
+        <label>
+          Multiplicador de supervivencia
+          <input id="survivalMult" type="range" min="0.98" max="1.02" step="0.0005" value="1.00" />
+          <span class="value" id="survivalMultVal">1.000</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="plot-grid">
+      <div class="card">
+        <h2>Población total</h2>
+        <div id="chart" class="chart"></div>
+        <p class="note">La curva discontinua es la proyección del modelo desde 2025; las curvas sólidas corresponden a la serie UN 1950–2100.</p>
+      </div>
+
+      <div class="card">
+        <h2>Edad media de la población</h2>
+        <div id="meanAgeChart" class="chart"></div>
+        <p class="note">La línea sólida es la edad media observada en UN; la discontinua sigue la proyección del modelo con el slider.</p>
+      </div>
+
+      <div class="card">
+        <h2>Tasa global de fecundidad (TFR)</h2>
+        <div id="fertilityChart" class="chart"></div>
+        <p class="note">La serie UN muestra la TFR observada; la línea punteada es la tendencia ajustada y modificada con el slider.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Fuente de datos</h2>
+      <p>
+        Los datos provienen de <strong>UN World Population Prospects 2024</strong> (WPP 2024),
+        con poblaciones por edad simple (0–100) y sexo para Argentina, para cuatro variantes:
+        <em>Estimates, Medium, High, Low</em>. 
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Modelo</h2>
+      <p>
+        Trabajamos con una pirámide por edad y sexo. Cada año, la población
+        <strong>envejece</strong> y <strong>sobrevive</strong>, y las mujeres de 15–49 años generan nacimientos.
+        Con los datos UN 2025–2100 calibramos el modelo y luego extendemos la tendencia.
+      </p>
+      <p>
+        <strong>Notación:</strong> $P_{a,s,t}$ es la población de edad $a$, sexo $s\in\{m,f\}$, año $t$.
+        $w_a$ es el patrón de fecundidad por edad (pesos fijos).
+      </p>
+      <p>
+        1) <strong>Supervivencia por edad</strong> (de UN):
+        $$S_{a,s}=\text{mediana}_t\left(\frac{P_{a+1,s,t+1}}{P_{a,s,t}}\right),\quad a=0,\dots,99$$
+      </p>
+      <p>
+        2) <strong>Nacimientos</strong> (según exposición de mujeres):
+        $$B_t=\left(\sum_{a=15}^{49} P_{a,f,t}\,w_a\right)\,F_t$$
+      </p>
+      <p>
+        3) <strong>Actualizar la pirámide</strong> (envejecimiento y supervivencia):
+        $$P_{0,m,t+1}=0.512\,B_t,\quad P_{0,f,t+1}=0.488\,B_t$$
+        $$P_{a+1,s,t+1}=P_{a,s,t}\,\min(1,\,S_{a,s}\,m_S),\quad a=0,\dots,99$$
+      </p>
+      <p>
+        4) <strong>Tasa de fecundidad (TFR)</strong> con grupos de 5 años:
+        $$\text{ASFR}_i=\frac{B_i}{W_i},\quad \text{TFR}=5\,\sum_i \text{ASFR}_i$$
+        En este modelo usamos un patrón fijo $w_a$ y estimamos una escala anual:
+        $$F_t=\frac{P_{0,\cdot,t}}{\sum_{a=15}^{49} P_{a,f,t-1}\,w_a}$$
+        y mostramos $\text{TFR}_t=5\,F_t$.
+      </p>
+      <p>
+        5) <strong>TFR con sesgo y pendiente</strong>:
+        $$\text{TFR}_t^{\ast}=\text{TFR}_{2024}+\delta+\gamma\,(t-2024)$$
+        donde $\delta$ es el sesgo (sube/baja el nivel) y $\gamma$ es la pendiente. La escala usada por el modelo es
+        $F_t^{\ast}=\text{TFR}_t^{\ast}/5$.
+      </p>
+
+    </section>
+
+    <section class="card">
+      <h2>Animación del pirámide de población</h2>
+      <img src="argentina_pyramid_1950_2100.gif" alt="Pirámide de población animada de Argentina 1950–2100" class="gif" />
+      <p class="note">
+        Animación generada con los mismos datos UN WPP 2024.
+        <a class="gif-download" href="argentina_pyramid_1950_2100.gif" download>Descargar GIF</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Proyecto de comunicación científica · Datos: UN WPP 2024 · Visualización interactiva</p>
+  </footer>
+</body>
+</html>
